@@ -26,22 +26,22 @@ struct PoolArray:
     coins: address[MAX_COINS]
     ul_coins: address[MAX_COINS]
     n_coins: uint256  # [coins, underlying coins] tightly packed as uint128[2]
-    has_initial_A: bool
+    has_initialA: bool
     is_v1: bool
     name: String[64]
     asset_type: uint256
 
 struct PoolParams:
     A: uint256
-    future_A: uint256
+    futureA: uint256
     fee: uint256
-    admin_fee: uint256
-    future_fee: uint256
-    future_admin_fee: uint256
+    adminFee: uint256
+    futureFee: uint256
+    futureAdminFee: uint256
     future_owner: address
-    initial_A: uint256
-    initial_A_time: uint256
-    future_A_time: uint256
+    initialA: uint256
+    initialATime: uint256
+    futureATime: uint256
 
 
 interface AddressProvider:
@@ -55,17 +55,16 @@ interface ERC20:
 
 interface CurvePool:
     def A() -> uint256: view
-    def future_A() -> uint256: view
+    def futureA() -> uint256: view
     def fee() -> uint256: view
-    def admin_fee() -> uint256: view
-    def future_fee() -> uint256: view
-    def future_admin_fee() -> uint256: view
+    def adminFee() -> uint256: view
+    def futureFee() -> uint256: view
+    def futureAdminFee() -> uint256: view
     def future_owner() -> address: view
-    def initial_A() -> uint256: view
-    def initial_A_time() -> uint256: view
-    def future_A_time() -> uint256: view
+    def initialA() -> uint256: view
+    def initialATime() -> uint256: view
+    def futureATime() -> uint256: view
     def coins(i: uint256) -> address: view
-    def underlying_coins(i: uint256) -> address: view
     def balances(i: uint256) -> uint256: view
     def get_virtual_price() -> uint256: view
 
@@ -338,24 +337,24 @@ def get_A(_pool: address) -> uint256:
 def get_parameters(_pool: address) -> PoolParams:
     """
     @notice Get parameters for a pool
-    @dev For older pools where `initial_A` is not public, this value is set to 0
+    @dev For older pools where `initialA` is not public, this value is set to 0
     @param _pool Pool address
     @return Pool amp, future amp, fee, admin fee, future fee, future admin fee,
             future owner, initial amp, initial amp time, future amp time
     """
     pool_params: PoolParams = empty(PoolParams)
     pool_params.A = CurvePool(_pool).A()
-    pool_params.future_A = CurvePool(_pool).future_A()
+    pool_params.futureA = CurvePool(_pool).futureA()
     pool_params.fee = CurvePool(_pool).fee()
-    pool_params.future_fee = CurvePool(_pool).future_fee()
-    pool_params.admin_fee = CurvePool(_pool).admin_fee()
-    pool_params.future_admin_fee = CurvePool(_pool).future_admin_fee()
+    pool_params.futureFee = CurvePool(_pool).futureFee()
+    pool_params.adminFee = CurvePool(_pool).adminFee()
+    pool_params.futureAdminFee = CurvePool(_pool).futureAdminFee()
     pool_params.future_owner = CurvePool(_pool).future_owner()
 
-    if self.pool_data[_pool].has_initial_A:
-        pool_params.initial_A = CurvePool(_pool).initial_A()
-        pool_params.initial_A_time = CurvePool(_pool).initial_A_time()
-        pool_params.future_A_time = CurvePool(_pool).future_A_time()
+    if self.pool_data[_pool].has_initialA:
+        pool_params.initialA = CurvePool(_pool).initialA()
+        pool_params.initialATime = CurvePool(_pool).initialATime()
+        pool_params.futureATime = CurvePool(_pool).futureATime()
 
     return pool_params
 
@@ -369,7 +368,7 @@ def get_fees(_pool: address) -> uint256[2]:
     @return Pool fee as uint256 with 1e10 precision
             Admin fee as 1e10 percentage of pool fee
     """
-    return [CurvePool(_pool).fee(), CurvePool(_pool).admin_fee()]
+    return [CurvePool(_pool).fee(), CurvePool(_pool).adminFee()]
 
 
 @view
@@ -476,7 +475,7 @@ def _add_pool(
     _pool: address,
     _n_coins: uint256,
     _lp_token: address,
-    _has_initial_A: bool,
+    _has_initialA: bool,
     _name: String[64],
 ):
     assert _sender == self.address_provider.admin()  # dev: admin-only function
@@ -489,7 +488,7 @@ def _add_pool(
     self.pool_list[length] = _pool
     self.pool_count = length + 1
     self.pool_data[_pool].location = length
-    self.pool_data[_pool].has_initial_A = _has_initial_A
+    self.pool_data[_pool].has_initialA = _has_initialA
     self.pool_data[_pool].n_coins = _n_coins
     self.pool_data[_pool].name = _name
 
@@ -668,7 +667,7 @@ def add_pool(
     _n_coins: uint256,
     _lp_token: address,
     _decimals: uint256,
-    _has_initial_A: bool,
+    _has_initialA: bool,
     _name: String[64],
 ):
     """
@@ -685,7 +684,7 @@ def add_pool(
         _pool,
         _n_coins + shift(_n_coins, 128),
         _lp_token,
-        _has_initial_A,
+        _has_initialA,
         _name,
     )
 
