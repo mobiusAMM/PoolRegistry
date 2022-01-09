@@ -76,7 +76,6 @@ interface GaugeController:
 
 event PoolAdded:
     pool: indexed(address)
-    rate_method_id: Bytes[4]
 
 event PoolRemoved:
     pool: indexed(address)
@@ -497,7 +496,7 @@ def _add_pool(
     self.get_lp_token[_pool] = _lp_token
     self.last_updated = block.timestamp
 
-    log PoolAdded(_pool, slice(_rate_info, 28, 4))
+    log PoolAdded(_pool)
 
 
 @internal
